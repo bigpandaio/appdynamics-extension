@@ -17,7 +17,9 @@ An Appdynamics custom action that sends alerts to BigPanda
 </custom-actions>
 ```
 
-3. Edit `<CONTROLLER INSTALL ROOT>/custom/actions/bigpanda-alert/config.ini` and set your API token and app key:
+## Configuration
+
+Edit `<CONTROLLER INSTALL ROOT>/custom/actions/bigpanda-alert/config.ini` and set your API token and app key:
 
 ```ini
 [base]
@@ -25,3 +27,5 @@ api_token: <YOUR API TOKEN>
 app_key: <YOUR APP_KEY>
 logging: no
 ```
+
+You can enable logging for debug purposes. The log will be at `/tmp/bigpanda.action.log`
