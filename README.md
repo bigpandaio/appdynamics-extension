@@ -7,10 +7,10 @@ An Appdynamics custom action that sends alerts to BigPanda
 
 2. Update or create `<CONTROLLER INSTALL ROOT>/custom/actions/custom.xml`. The file should look like this:
 
-```
+```xml
 <custom-actions>
   <action>
-    <type>bigpanda</type>
+    <type>bigpanda-alert</type>
     <executable>bigpanda-alert.py</executable>
   </action>
   ...your other actions...
