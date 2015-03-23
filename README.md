@@ -11,7 +11,7 @@ An Appdynamics custom action that sends alerts to BigPanda
 <custom-actions>
   <action>
     <type>bigpanda</type>
-    <executable>bigpanda.action.py</executable>
+    <executable>bigpanda-alert.py</executable>
   </action>
   ...your other actions...
 </custom-actions>

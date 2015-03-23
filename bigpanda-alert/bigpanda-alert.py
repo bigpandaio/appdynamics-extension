@@ -12,7 +12,7 @@ import logging.handlers
 
 
 current_dir = os.path.realpath(os.path.dirname(__file__))
-CONFIG_FILE = os.path.join(current_dir, 'bigpanda.action.ini')
+CONFIG_FILE = os.path.join(current_dir, 'config.ini')
 BP_BASE_URL = 'http://10.0.10.17:1337'
 TIMEOUT=120
 
