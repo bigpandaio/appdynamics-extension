@@ -41,8 +41,28 @@ def detach(func):
 
     return t
 
-def mock_server(port=8080):
-    server_addr = ('', port)
-    httpd = BaseHTTPServer.HTTPServer(server_addr, MyHTTPHandler)
-    httpd.request_info = dict()
-    return httpd
+class MockServer(object):
+    def __init__(self, port=8000):
+        server_addr = ('', port)
+        httpd = BaseHTTPServer.HTTPServer(server_addr, MyHTTPHandler)
+        httpd.request_info = dict()
+        self.httpd = httpd
+        self.server_thread = None
+
+    def handle_request(self, detached=True):
+        if detached:
+            self.server_thread = threading.Thread(target=self.httpd.handle_request)
+            self.server_thread.start()
+        else:
+            self.httpd.handle_request()
+
+    def server_forever(self, detached=True):
+        if detached:
+            self.server_thread = threading.Thread(target=self.httpd.serve_forever)
+            self.server_thread.start()
+        else:
+            self.httpd.serve_forever()
+
+    @property
+    def request_info(self):
+        return self.httpd.request_info

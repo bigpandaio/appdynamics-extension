@@ -13,7 +13,7 @@ current_dir = os.path.dirname(__file__)
 
 @pytest.fixture()
 def httpd():
-    return server.mock_server(PORT)
+    return server.MockServer(PORT)
 
 def run_script(args, timeout=SCRIPT_TIMEOUT):
     env = dict(BP_BASE_URL='http://localhost:%d' % PORT)
@@ -125,19 +125,19 @@ def get_alert_info(event_type, condition_unit_type=None, baseline_name_id=None, 
 
 
 class TestAppdAction:
-#    def test_run_no_args(self, httpd):
-#        script = run_script([])
-#        
-#        assert script.returncode == 0
-#
-#        # No request was made
-#        assert httpd.request_info == dict()
+    def test_run_no_args(self, httpd):
+        script = run_script([])
+        
+        assert script.returncode == 0
+
+        # No request was made
+        assert httpd.request_info == dict()
 
     def test_run_healthrule_absolute_open_warning(self, httpd):
         alert_info = get_alert_info('POLICY_OPEN_WARNING', 'ABSOLUTE')
         script_args = mkargs(alert_info)
 
-        server_thread = server.detach(httpd.handle_request)
+        httpd.handle_request()
         script = run_script(script_args)
 
         assert script.returncode == 0
