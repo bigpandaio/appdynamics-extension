@@ -45,6 +45,7 @@ class MockServer(object):
     def __init__(self, port=8000):
         server_addr = ('', port)
         httpd = BaseHTTPServer.HTTPServer(server_addr, MyHTTPHandler)
+        httpd.allow_reuse_address = True
         httpd.request_info = dict()
         self.httpd = httpd
         self.server_thread = None
@@ -52,17 +53,23 @@ class MockServer(object):
     def handle_request(self, detached=True):
         if detached:
             self.server_thread = threading.Thread(target=self.httpd.handle_request)
+            self.server_thread.daemon = True
             self.server_thread.start()
         else:
             self.httpd.handle_request()
 
-    def server_forever(self, detached=True):
+    def serve_forever(self, detached=True):
         if detached:
             self.server_thread = threading.Thread(target=self.httpd.serve_forever)
+            self.server_thread.daemon = True
             self.server_thread.start()
         else:
             self.httpd.serve_forever()
 
-    @property
-    def request_info(self):
+    def set_request_info(self, value):
+        self.httpd.request_info = value
+
+    def get_request_info(self):
         return self.httpd.request_info
+
+    request_info = property(get_request_info, set_request_info)

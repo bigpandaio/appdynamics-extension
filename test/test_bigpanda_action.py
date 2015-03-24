@@ -11,10 +11,6 @@ SCRIPT_TIMEOUT = 10
 
 current_dir = os.path.dirname(__file__)
 
-@pytest.fixture()
-def httpd():
-    return server.MockServer(PORT)
-
 def run_script(args, timeout=SCRIPT_TIMEOUT):
     env = dict(BP_BASE_URL='http://localhost:%d' % PORT)
     cmd = "%s/../bigpanda-alert/bigpanda-alert.py" % current_dir
@@ -111,12 +107,11 @@ def get_alert_info(event_type, condition_unit_type=None, baseline_name_id=None, 
                 if baseline_name_id:
                     triggered_condition['use_default_baseline'] = False
                     triggered_condition['baseline_name'] = baseline_name_id[0]
-                    triggered_condition['baseline_id'] = baseline_name_id[1]
+                    triggered_condition['baseline_id'] = str(baseline_name_id[1])
                 else:
                     triggered_condition['use_default_baseline'] = True
-            else:
-                triggered_condition['threshold_value'] = "10.0"
-                triggered_condition['observed_value'] = "13.0"
+            triggered_condition['threshold_value'] = "10.0"
+            triggered_condition['observed_value'] = "13.0"
 
             eval_entity['triggered_conditions'].append(triggered_condition)
         alert_info['evaluation_entities'].append(eval_entity)
@@ -124,8 +119,18 @@ def get_alert_info(event_type, condition_unit_type=None, baseline_name_id=None, 
     return alert_info
 
 
+httpd = server.MockServer(PORT)
+
 class TestAppdAction:
-    def test_run_no_args(self, httpd):
+    @pytest.fixture(autouse=True, scope='class')
+    def mock_httpd(self):
+        httpd.serve_forever()
+
+    @pytest.fixture(autouse=True, scope='function')
+    def clean_request_info(self):
+        httpd.request_info = dict()
+
+    def test_run_no_args(self):
         script = run_script([])
         
         assert script.returncode == 0
@@ -133,11 +138,10 @@ class TestAppdAction:
         # No request was made
         assert httpd.request_info == dict()
 
-    def test_run_healthrule_absolute_open_warning(self, httpd):
+    def test_run_healthrule_absolute_open(self):
         alert_info = get_alert_info('POLICY_OPEN_WARNING', 'ABSOLUTE')
         script_args = mkargs(alert_info)
 
-        httpd.handle_request()
         script = run_script(script_args)
 
         assert script.returncode == 0
@@ -145,3 +149,46 @@ class TestAppdAction:
 
         assert body == alert_info
 
+    def test_run_healthrule_absolute_close(self):
+        alert_info = get_alert_info('POLICY_CLOSE_WARNING', 'ABSOLUTE', num_entities=0)
+        script_args = mkargs(alert_info)
+
+        script = run_script(script_args)
+
+        assert script.returncode == 0
+        body = server.to_json(httpd.request_info)
+
+        assert body == alert_info
+
+    def test_run_healthrule_absolute_cancel(self):
+        alert_info = get_alert_info('POLICY_CANCELED_WARNING', 'ABSOLUTE', num_entities=0)
+        script_args = mkargs(alert_info)
+
+        script = run_script(script_args)
+
+        assert script.returncode == 0
+        body = server.to_json(httpd.request_info)
+
+        assert body == alert_info
+
+    def test_run_healthrule_baseline_default(self):
+        alert_info = get_alert_info('POLICY_OPEN_WARNING', 'BASELINE_PERCENTAGE')
+        script_args = mkargs(alert_info)
+
+        script = run_script(script_args)
+
+        assert script.returncode == 0
+        body = server.to_json(httpd.request_info)
+
+        assert body == alert_info
+
+    def test_run_healthrule_baseline_custom(self):
+        alert_info = get_alert_info('POLICY_OPEN_WARNING', 'BASELINE_PERCENTAGE', ['baseline', 1234])
+        script_args = mkargs(alert_info)
+
+        script = run_script(script_args)
+
+        assert script.returncode == 0
+        body = server.to_json(httpd.request_info)
+
+        assert body == alert_info
