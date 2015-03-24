@@ -122,3 +122,4 @@ try:
     urllib2.urlopen(request)
 except:
     log.exception("Error while running script")
+    raise
