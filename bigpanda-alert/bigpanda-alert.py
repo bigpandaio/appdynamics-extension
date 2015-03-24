@@ -13,7 +13,7 @@ import logging.handlers
 
 current_dir = os.path.realpath(os.path.dirname(__file__))
 CONFIG_FILE = os.path.join(current_dir, 'config.ini')
-BP_BASE_URL = 'http://10.0.10.17:1337'
+BP_BASE_URL = os.environ.get('BP_BASE_URL', 'https://api.bigpanda.io')
 TIMEOUT=120
 
 LOG_FILE = '/tmp/bigpanda.action.log'
