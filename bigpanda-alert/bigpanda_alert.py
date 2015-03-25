@@ -11,7 +11,7 @@ import logging
 import logging.handlers
 
 
-VERSION='1.1'
+VERSION='1.2'
 
 current_dir = os.path.realpath(os.path.dirname(__file__))
 CONFIG_FILE = os.path.join(current_dir, 'config.ini')
