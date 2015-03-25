@@ -1,9 +1,23 @@
----
 language: python
 python:
-        - "2.4"
-        - "2.6"
-        - "2.7"
+- '2.4'
+- '2.6'
+- '2.7'
 install:
-        - pip install -r requirements-test.txt
+- pip install -r requirements-test.txt
 script: py.test
+before_deploy:
+- mkdir dist
+- tar czf dist/bigpanda-alert-`git describe|sed s/^v//`.tar.gz bigpanda-alert --exclude
+  *.pyc
+- tar czf dist/bigpanda-alert-latest.tar.gz bigpanda-alert --exclude *.pyc
+deploy:
+  provider: s3
+  access_key_id: AKIAJK3FVON55XJC5O2Q
+  secret_access_key:
+    secure: VDARQIYozFKqu2paA5vEgebsyQdQngftzyxpPLwHdWS7fj8lyQlbXRqlBhd83M+4j8fExY3BPCeKG9Zaf1Qmi868mo+kY/BZgV8DtA8X1dv69dJ0kPIJHHxpksTig3wFV8mej9xMGi4ti+WP84v6SDaIzxF5q1esme/zqqYRiDw=
+  bucket: bp-appdynamics-extension
+  region: us-west-1
+  acl: public_read
+  on:
+      tags: true
