@@ -11,7 +11,7 @@ An Appdynamics custom action that sends alerts to BigPanda
 <custom-actions>
   <action>
     <type>bigpanda-alert</type>
-    <executable>bigpanda-alert.py</executable>
+    <executable>bigpanda_alert.py</executable>
   </action>
   ...your other actions...
 </custom-actions>
@@ -28,4 +28,4 @@ app_key: <YOUR APP_KEY>
 logging: no
 ```
 
-You can enable logging for debug purposes. The log will be at `/tmp/bigpanda.action.log`
+You can enable logging for debug purposes. The log will be at `/tmp/bigpanda-alert.log`
