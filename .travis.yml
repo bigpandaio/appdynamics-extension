@@ -19,5 +19,6 @@ deploy:
   bucket: bp-appdynamics-extension
   region: us-west-1
   acl: public_read
+  local_dir: dist
   on:
       tags: true
