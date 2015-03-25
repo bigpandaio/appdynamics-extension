@@ -20,33 +20,24 @@ LOG_FILE = '/tmp/bigpanda.action.log'
 LOG_MAX_BYTES = 2.5 * 1024 * 1024 # 2.5 MB
 LOG_BACKUP_COUNT = 1 # Two files overall
 
-# Check input
-if len(sys.argv) < 14:
-    print "%s: doesn't look like appdynamics health rule run, quitting" % sys.argv[0]
-    sys.exit(0)
-
-# Init logging object
 log = logging.getLogger("bigpanda.appdynamics")
-log.addHandler(logging.NullHandler())
-log.setLevel(logging.INFO)
 
-# Parse config file
-try:
+
+def init_log():
+    "Init logging object"
+    log.addHandler(logging.StreamHandler())
+    log.setLevel(logging.INFO)
+
+def parse_config(config_file):
+    "Parse config file"
     config = ConfigParser.SafeConfigParser()
-    config.read(CONFIG_FILE)
-    api_token = config.get('base', 'api_token')
-    app_key = config.get('base', 'app_key')
-except Exception as e:
-    sys.stderr.write("Failed to parse bigpanda.ini file: %s" % str(e))
-    sys.exit(1)
+    config.read(config_file)
 
-if config.has_option('base', 'logging') and config.get('base', 'logging').lower() in ['1', 'true', 'yes']:
-   log_handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes=LOG_MAX_BYTES, backupCount=LOG_BACKUP_COUNT)
-   log.addHandler(log_handler)
+    return config
 
-try:
+def parse_args(args):
     # All args are surrounded by quotes, so we need to remove them
-    unquoted_args = map(lambda x: x[1:-1], sys.argv)
+    unquoted_args = map(lambda x: x[1:-1], args)
 
     # Parse args
     log.info("Parsing command line arguments")
@@ -110,7 +101,10 @@ try:
     params['deep_link_url'] = unquoted_args[args_index+2]
     params['event_type'] = unquoted_args[args_index+3]
 
-    # Prepare and send HTTP request
+    return params
+
+def send_params(params, api_token, app_key):
+    "Prepare and send HTTP request"
     data = json.dumps(params)
     headers = { "Content-Type": "application/json", "Authorization": "Bearer " + api_token }
     url = '%s/data/integrations/appdynamics?app_key=%s' % (BP_BASE_URL, app_key)
@@ -120,6 +114,41 @@ try:
     request = urllib2.Request(url=url, headers=headers, data=data)
     socket.setdefaulttimeout(TIMEOUT)
     urllib2.urlopen(request)
-except:
-    log.exception("Error while running script")
-    raise
+
+def main(args):
+    init_log()
+
+    try:
+        config = parse_config(CONFIG_FILE)
+        api_token = config.get('base', 'api_token')
+        app_key = config.get('base', 'app_key')
+    except:
+        log.exception("Error parsing configuration file %s", CONFIG_FILE)
+        return 1
+
+    if config.has_option('base', 'logging') and config.get('base', 'logging').lower() in ['1', 'true', 'yes']:
+       log_handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes=LOG_MAX_BYTES, backupCount=LOG_BACKUP_COUNT)
+       log.addHandler(log_handler)
+
+    # Check input
+    if len(args) < 14:
+        log.info("doesn't look like appdynamics health rule run, quitting")
+        return 0
+
+    try:
+        params = parse_args(args)
+    except:
+        log.exception("Error parsing alert")
+        return 1
+
+    try:
+        send_params(params, api_token, app_key)
+    except:
+        log.exception("Error sending alert to BigPanda")
+        return 1
+
+    return 0
+
+if __name__ == "__main__":
+    ret = main(sys.argv)
+    sys.exit(ret)
