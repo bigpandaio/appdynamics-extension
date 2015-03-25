@@ -16,7 +16,7 @@ CONFIG_FILE = os.path.join(current_dir, 'config.ini')
 BP_BASE_URL = os.environ.get('BP_BASE_URL', 'https://api.bigpanda.io')
 TIMEOUT=120
 
-LOG_FILE = '/tmp/bigpanda.action.log'
+LOG_FILE = '/tmp/bigpanda-alert.log'
 LOG_MAX_BYTES = 2.5 * 1024 * 1024 # 2.5 MB
 LOG_BACKUP_COUNT = 1 # Two files overall
 LOG_MSG_FORMAT = "%(asctime)s %(levelname)s %(message)s"

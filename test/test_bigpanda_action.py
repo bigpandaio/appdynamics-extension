@@ -3,6 +3,8 @@ import pytest
 import subprocess
 import os
 import time
+import sys
+import ConfigParser
 
 import server
 
@@ -13,8 +15,8 @@ current_dir = os.path.dirname(__file__)
 
 def run_script(args, timeout=SCRIPT_TIMEOUT):
     env = dict(BP_BASE_URL='http://localhost:%d' % PORT)
-    cmd = "%s/../bigpanda-alert/bigpanda-alert.py" % current_dir
-    script = subprocess.Popen([cmd] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+    cmd = "%s/../bigpanda_alert/bigpanda_alert.py" % current_dir
+    script = subprocess.Popen([cmd] + args, env=env)
     
     if timeout:
         ret = timed_poll(script, timeout)
@@ -33,6 +35,30 @@ def timed_poll(proc, timeout):
             return status
         time.sleep(1)
         wait_time += 1
+
+@pytest.fixture()
+def config_file(request):
+    config_path = "%s/../bigpanda_alert/config.ini" % current_dir
+    os.rename(config_path, config_path + '.test_orig')
+    new_config = file(config_path, 'w', buffering=0)
+
+    def fin():
+        new_config.close()
+        os.remove(config_path)
+        os.rename(config_path + '.test_orig', config_path)
+    request.addfinalizer(fin)
+
+    return new_config
+
+@pytest.fixture()
+def config_obj():
+    config = ConfigParser.SafeConfigParser()
+    config.add_section('base')
+    config.set('base', 'api_token', '')
+    config.set('base', 'app_key', '')
+    config.set('base', 'logging', 'no')
+
+    return config
 
 def mkargs(alert_info):
     args = []
@@ -192,3 +218,20 @@ class TestAppdAction:
         body = server.to_json(httpd.request_info)
 
         assert body == alert_info
+
+    def test_request_metadata(self, config_file, config_obj):
+        app_key = 'key123'
+        api_token = 'token123'
+        config_obj.set('base', 'app_key', app_key)
+        config_obj.set('base', 'api_token', api_token)
+        config_obj.write(config_file)
+
+        alert_info = get_alert_info('POLICY_OPEN_WARNING', 'ABSOLUTE')
+        script_args = mkargs(alert_info)
+
+        script = run_script(script_args)
+
+        assert script.returncode == 0
+        assert httpd.request_info['command'] == 'POST'
+        assert httpd.request_info['path'] == '/data/integrations/appdynamics?app_key=' + app_key
+        assert httpd.request_info['headers']['authorization'] == 'Bearer ' + api_token
