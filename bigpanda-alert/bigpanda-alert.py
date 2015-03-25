@@ -19,13 +19,16 @@ TIMEOUT=120
 LOG_FILE = '/tmp/bigpanda.action.log'
 LOG_MAX_BYTES = 2.5 * 1024 * 1024 # 2.5 MB
 LOG_BACKUP_COUNT = 1 # Two files overall
+LOG_MSG_FORMAT = "%(asctime)s %(levelname)s %(message)s"
 
 log = logging.getLogger("bigpanda.appdynamics")
 
 
 def init_log():
     "Init logging object"
-    log.addHandler(logging.StreamHandler())
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
+    log.addHandler(handler)
     log.setLevel(logging.INFO)
 
 def parse_config(config_file):
@@ -128,6 +131,7 @@ def main(args):
 
     if config.has_option('base', 'logging') and config.get('base', 'logging').lower() in ['1', 'true', 'yes']:
        log_handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes=LOG_MAX_BYTES, backupCount=LOG_BACKUP_COUNT)
+       log_handler.setFormatter(logging.Formatter(LOG_MSG_FORMAT))
        log.addHandler(log_handler)
 
     # Check input
