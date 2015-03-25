@@ -15,7 +15,7 @@ current_dir = os.path.dirname(__file__)
 
 def run_script(args, timeout=SCRIPT_TIMEOUT):
     env = dict(BP_BASE_URL='http://localhost:%d' % PORT)
-    cmd = "%s/../bigpanda_alert/bigpanda_alert.py" % current_dir
+    cmd = "%s/../bigpanda-alert/bigpanda_alert.py" % current_dir
     script = subprocess.Popen([cmd] + args, env=env)
     
     if timeout:
@@ -38,7 +38,7 @@ def timed_poll(proc, timeout):
 
 @pytest.fixture()
 def config_file(request):
-    config_path = "%s/../bigpanda_alert/config.ini" % current_dir
+    config_path = "%s/../bigpanda-alert/config.ini" % current_dir
     os.rename(config_path, config_path + '.test_orig')
     new_config = file(config_path, 'w', buffering=0)
 
