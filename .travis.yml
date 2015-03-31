@@ -9,7 +9,7 @@ before_deploy:
 - mkdir dist
 - tar czf dist/bigpanda-alert-`git describe|sed s/^v//`.tar.gz bigpanda-alert --exclude
   *.pyc
-- tar czf dist/bigpanda-alert-latest.tar.gz bigpanda-alert --exclude *.pyc
+- tar czf dist/bigpanda-alert-latest.tar.gz bigpanda-alert --exclude *.pyc --owner root --group root
 deploy:
   provider: s3
   access_key_id: AKIAJK3FVON55XJC5O2Q
