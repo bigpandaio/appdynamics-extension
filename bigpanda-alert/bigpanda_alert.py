@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import sys
-import json
 import urllib2
 import ConfigParser
 import socket
@@ -9,6 +8,10 @@ import time
 import os
 import logging
 import logging.handlers
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 
 VERSION='1.2'
