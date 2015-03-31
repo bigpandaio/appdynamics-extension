@@ -14,7 +14,7 @@ except ImportError:
     import simplejson as json
 
 
-VERSION='1.2'
+VERSION='1.3'
 
 current_dir = os.path.realpath(os.path.dirname(__file__))
 CONFIG_FILE = os.path.join(current_dir, 'config.ini')
