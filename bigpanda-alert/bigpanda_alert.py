@@ -34,7 +34,7 @@ def init_log():
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
     log.addHandler(handler)
-    log.setLevel(logging.INFO)
+    log.setLevel(logging.DEBUG)
 
 def parse_config(config_file):
     "Parse config file"
