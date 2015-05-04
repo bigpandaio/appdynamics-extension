@@ -32,7 +32,7 @@ You can enable logging for debug purposes. The log will be at `/tmp/bigpanda-ale
 
 ## Releasing
 
-Create a release branch (git-flow) with the new version and merge it back into develop and master. Logic changes should bump minor version (e.g. 1.3 to 1.4) while minor fixes should bump patch version (e.g. 1.3 to 1.3.1).
+Create a release branch (git-flow) with the new version, bump the version inside bigpanda-alert/bigpanda-alert.py, commit and merge it back into develop and master. Logic changes should bump minor version (e.g. 1.3 to 1.4) while minor fixes should bump patch version (e.g. 1.3 to 1.3.1).
 
 ## Deploying
 
